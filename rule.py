@@ -13,10 +13,6 @@ def tokenize(rule_string):
     token_pattern = r'(\(|\)|AND|OR|=|>|<|\'[^\']*\'|\w+|\d+)'
     return re.findall(token_pattern, rule_string)
 
-# def tokenize(rule_string):
-#     token_pattern = r"(\b\w+\b|[><=!]=|['\"].*?['\"]|\(|\)|AND|OR)"
-#     tokens = re.findall(token_pattern, rule_string)
-#     return tokens
 
 def build_ast(tokens):
     operators = []
@@ -72,36 +68,11 @@ def build_ast(tokens):
 
 def create_rule(rule_string):
     tokens = tokenize(rule_string)
-    print("Tokens", tokens)
+    #print("Tokens", tokens)
     ast = build_ast(tokens)    
     return ast
 
-
-sample_rule = "((age > 30 AND department = 'Marketing')) AND (salary > 20000 OR experience > 5)"
-ast = create_rule(sample_rule)
-# def print_ast(node, indent=0):
-#     if node:
-#         print(' ' * indent + f'Node type: {node.node_type}, value: {node.value}')
-#         print_ast(node.left, indent + 2)
-#         print_ast(node.right, indent + 2)
-
-
-# def print_ast(node, indent=0):
-#     if node:
-#         # Print the current node with indentation
-#         print(' ' * indent + f"Node(type='{node.node_type}', value='{node.value}')")
-        
-#         # Recursively print the left and right children with increased indentation
-#         if node.left:
-#             print(' ' * (indent + 2) + "Left:")
-#             print_ast(node.left, indent + 4)
-#         if node.right:
-#             print(' ' * (indent + 2) + "Right:")
-#             print_ast(node.right, indent + 4)
-
-# Print the AST for inspection
-#print_ast(ast)
-print("AST Structure:")
+#print("AST Structure:")
 def print_ast(node, level=0):
     """Recursively print the AST in a structured format."""
     if node is not None:
@@ -111,4 +82,116 @@ def print_ast(node, level=0):
         print_ast(node.right, level + 1)
 
 
-print_ast(ast)
+def evaluate_rule(node, data):
+    """
+    Recursively evaluate the AST based on the input data.
+    
+    Args:
+    - node: The root node of the AST to evaluate.
+    - data: A dictionary representing user attributes (e.g., {"age": 35, "department": "Sales", ...})
+    
+    Returns:
+    - True if the rule evaluates to True for the given data, False otherwise.
+    """
+    if node.type == 'operand':
+        # Evaluate the condition in the operand node
+        print("Operand Node", node.value)
+        return evaluate_condition(node.value, data)
+    
+    elif node.type == 'operator':
+        # Recursively evaluate left and right nodes
+        print("Root node", node, "Left Node", node.left)
+        left_result = evaluate_rule(node.left, data)
+        print("Left Result", left_result)
+        print("Root node", node, "Right Node", node.right)
+        right_result = evaluate_rule(node.right, data)
+        print("Right Result", right_result)
+        # Apply the operator (AND or OR)
+        if node.value == 'AND':
+            return left_result and right_result
+        elif node.value == 'OR':
+            return left_result or right_result
+    
+    return False
+
+def evaluate_condition(condition, data):
+    """
+    Evaluate a single condition (operand) like "age > 30" against the data dictionary.
+    
+    Args:
+    - condition: A string representing the condition (e.g., "age > 30")
+    - data: A dictionary containing user data (e.g., {"age": 35, "department": "Sales", ...})
+    
+    Returns:
+    - True if the condition is satisfied, False otherwise.
+    """
+    # Split the condition into field, operator, and value
+    # Example: "age > 30" -> field = "age", operator = ">", value = "30"
+    
+    tokens = condition.split()
+    
+    if len(tokens) != 3:
+        raise ValueError(f"Invalid condition: {condition}")
+    
+    field, operator, value = tokens
+    value = parse_value(value)  # Convert value to int/float if needed
+    
+    # Get the actual value from the data dictionary
+    if field not in data:
+        return False  # Field doesn't exist in data
+    
+    actual_value = data[field]
+    print("JSON Value", actual_value)
+    print("Code Value", value)
+    
+    # Compare based on the operator
+    if operator == '>':
+        return actual_value > value
+    elif operator == '<':
+        return actual_value < value
+    elif operator == '>=':
+        return actual_value >= value
+    elif operator == '<=':
+        return actual_value <= value
+    elif operator == '=':
+        return actual_value == value
+    elif operator == '!=':
+        return actual_value != value
+    else:
+        raise ValueError(f"Unsupported operator: {operator}")
+    
+def parse_value(value):
+    """
+    Convert a string value into an appropriate type (int, float, or string).
+    
+    Args:
+    - value: The string representation of the value.
+    
+    Returns:
+    - The value converted to int, float, or string.
+    """
+    if (value.startswith("'") and value.endswith("'")) or (value.startswith('"') and value.endswith('"')):
+        value = value[1:-1]
+    try:
+        if '.' in value:
+            return float(value)
+        else:
+            return int(value)
+    except ValueError:
+        # If it's not a number, return the string as-is (e.g., for department)
+        return value
+
+
+sample_rule = "((age > 30 AND department = 'Marketing')) AND (salary > 20000 OR experience > 5)"
+ast = create_rule(sample_rule)
+#print_ast(ast)
+
+data = {
+    "age": 35,
+    "department": "Marketing",
+    "salary": 10000,
+    "experience": 6
+}
+
+result = evaluate_rule(ast, data)
+print(result)
