@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Engine UI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><center>Rule Engine with AST</center></h1>
+        
+        <!-- Form to Create Rule -->
+        <div class="rule-section">
+            <h2>Create a Rule</h2>
+            <form id="ruleForm">
+                <label for="rule">Enter Rule:</label>
+                <input type="text" id="rule" placeholder="e.g., age > 30 AND department = 'Sales'">
+                <button type="button" onclick="createRule()">Create Rule</button>
+            </form>
+        </div>
+
+        <!-- Display AST -->
+        <div class="ast-section">
+            <h2>AST of Rule</h2>
+            <pre id="astOutput"></pre>
+        </div>
+
+        <!-- Form to Evaluate Rule -->
+        <div class="evaluate-section">
+            <h2>Evaluate Rule</h2>
+            <form id="evaluationForm">
+                <label for="data">Enter Data:</label>
+                <input type="text" id="data" placeholder="{ 'age': 35, 'department': 'Sales' }">
+                <button type="button" onclick="evaluateRule()">Evaluate Rule</button>
+            </form>
+            <p id="resultOutput"></p>
+        </div>
+
+        <!-- Combine Multiple Rules -->
+        <div class="combine-section">
+            <h2>Combine Rules</h2>
+            <textarea id="rulesList" rows="5" placeholder="Enter multiple rules, each on a new line"></textarea>
+            <button type="button" onclick="combineRules()">Combine Rules</button>
+            <pre id="combinedAstOutput"></pre>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

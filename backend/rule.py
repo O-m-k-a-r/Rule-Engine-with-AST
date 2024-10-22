@@ -8,6 +8,24 @@ class Node:
     def __repr__(self):
         return f"Node(type={self.type}, value={self.value})"
 
+    def to_dict(self):
+        return {
+            'type': self.type,
+            'value': self.value,
+            'left': self.left.to_dict() if self.left else None,
+            'right': self.right.to_dict() if self.right else None
+        }
+    @classmethod
+    def from_dict(cls, node_dict):
+        if node_dict is None:
+            return None
+        return cls(
+            type=node_dict['type'],
+            value=node_dict['value'],
+            left=cls.from_dict(node_dict['left']),
+            right=cls.from_dict(node_dict['right'])
+        )
+
 import re
 def tokenize(rule_string):
     token_pattern = r'(\(|\)|AND|OR|=|>|<|\'[^\']*\'|\w+|\d+)'
@@ -185,7 +203,7 @@ def parse_value(value):
 sample_rule = "((age > 30 AND department = 'Marketing')) AND (salary > 20000 OR experience > 5)"
 ast = create_rule(sample_rule)
 #print_ast(ast)
-
+print("AST", type(ast))
 data = {
     "age": 35,
     "department": "Marketing",
@@ -195,3 +213,96 @@ data = {
 
 result = evaluate_rule(ast, data)
 print(result)
+
+def count_operators(node, operator_count):
+    """
+    Recursively count the occurrences of AND/OR operators in the AST.
+    
+    Args:
+    - node: The current AST node.
+    - operator_count: Dictionary to keep track of the frequency of 'AND' and 'OR' operators.
+    """
+    if node is None:
+        return
+    
+    if node.type == 'operator':
+        operator_count[node.value] += 1
+        count_operators(node.left, operator_count)
+        count_operators(node.right, operator_count)
+
+
+def merge_common_subtrees(ast1, ast2):
+    """
+    Merge two ASTs, ensuring common subtrees are only included once.
+    
+    Args:
+    - ast1: The first AST.
+    - ast2: The second AST.
+    
+    Returns:
+    - The merged AST with common subtrees combined.
+    """
+    if ast1 is None:
+        return ast2
+    if ast2 is None:
+        return ast1
+
+    # If both nodes are identical (same type and value), we return one of them
+    if ast1.type == ast2.type and ast1.value == ast2.value:
+        return Node(type=ast1.type, value=ast1.value, left=merge_common_subtrees(ast1.left, ast2.left), right=merge_common_subtrees(ast1.right, ast2.right))
+    
+    # Otherwise, we return a new OR node combining both
+    return Node(type='operator', value='OR', left=ast1, right=ast2)
+
+
+def select_most_frequent_operator(operator_count):
+    """
+    Select the most frequent operator ('AND' or 'OR') based on their counts.
+    
+    Args:
+    - operator_count: Dictionary with counts of 'AND' and 'OR'.
+    
+    Returns:
+    - The operator that occurs most frequently.
+    """
+    return 'AND' if operator_count['AND'] > operator_count['OR'] else 'OR'
+
+
+def combine_rules_with_heuristic(rules):
+    """
+    Combine a list of rule strings into a single AST, considering redundancy and operator frequencies.
+    
+    Args:
+    - rules: A list of rule strings.
+    
+    Returns:
+    - The root node of the combined AST.
+    """
+    if not rules:
+        return None  # No rules to combine
+
+    # Step 1: Build individual ASTs for each rule
+    asts = [build_ast(tokenize(rule)) for rule in rules]
+
+    # Step 2: Count operator frequencies in all rules
+    operator_count = {'AND': 0, 'OR': 0}
+    for ast in asts:
+        count_operators(ast, operator_count)
+
+    # Step 3: Select the most frequent operator (AND or OR)
+    frequent_operator = select_most_frequent_operator(operator_count)
+    
+    # Step 4: Combine the ASTs with the selected operator and merge common subtrees
+    combined_ast = asts[0]
+    for ast in asts[1:]:
+        combined_ast = Node(type='operator', value=frequent_operator, left=combined_ast, right=merge_common_subtrees(combined_ast, ast))
+    
+    return combined_ast
+
+
+rules = [
+    "((age > 30 AND department = 'Sales') OR (age < 25 AND department = 'Marketing')) AND (salary > 50000 OR experience > 5)",
+    "((age > 30 AND department = 'Marketing')) AND (salary > 20000 OR experience > 5)"
+]
+combined_ast = combine_rules_with_heuristic(rules)
+print_ast(combined_ast)
