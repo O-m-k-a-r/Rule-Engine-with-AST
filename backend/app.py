@@ -5,7 +5,6 @@ from rule import create_rule, combine_rules_with_heuristic, evaluate_rule, evalu
 app = Flask(__name__)
 CORS(app)
 
-
 rule_storage = {}
 @app.route('/')
 def home():
