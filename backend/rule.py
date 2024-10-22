@@ -247,11 +247,11 @@ def merge_common_subtrees(ast1, ast2):
     if ast2 is None:
         return ast1
 
-    # If both nodes are identical (same type and value), we return one of them
+    # If both nodes are identical (same type and value), return one of them
     if ast1.type == ast2.type and ast1.value == ast2.value:
         return Node(type=ast1.type, value=ast1.value, left=merge_common_subtrees(ast1.left, ast2.left), right=merge_common_subtrees(ast1.right, ast2.right))
     
-    # Otherwise, we return a new OR node combining both
+    # Otherwise, return a new OR node combining both
     return Node(type='operator', value='OR', left=ast1, right=ast2)
 
 

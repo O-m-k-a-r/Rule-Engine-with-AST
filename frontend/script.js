@@ -1,4 +1,4 @@
-const apiBaseUrl = "http://localhost:5000"; // Change to your backend URL
+const apiBaseUrl = "http://localhost:5000"; // backend URL
 let ruleAstRootNode = null;
 
 function generateUniqueId() {
@@ -26,7 +26,7 @@ function createRule() {
     });
 }
 
-// Evaluate Rule
+
 function evaluateRule() {
     const data = JSON.parse(document.getElementById("data").value);
     const ruleId = localStorage.getItem('ruleId');
@@ -51,7 +51,7 @@ function evaluateRule() {
     });
 }
 
-// Combine Rules
+
 function combineRules() {
     const rules = document.getElementById("rulesList").value.split("\n");
 

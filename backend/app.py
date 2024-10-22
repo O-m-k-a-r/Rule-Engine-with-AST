@@ -14,19 +14,19 @@ def home():
 def create_rule_api():
     rule_string = request.json['rule']
     rule_id = request.json.get('id')
-    root_node = create_rule(rule_string)  # Use your function from rule.py
+    root_node = create_rule(rule_string)  # This is from rule.py
     print("ROOT TYPE:", type(root_node))
     rule_storage[rule_id] = root_node
     return jsonify({'message': 'Rule created successfully', 'rule_ast': str(root_node)})
 
-# Example API to combine rules
+
 @app.route('/combine_rules', methods=['POST'])
 def combine_rules_api():
     rules = request.json['rules']
-    combined_ast = combine_rules_with_heuristic(rules)  # Use your function from rule.py
+    combined_ast = combine_rules_with_heuristic(rules)  
     return jsonify({'message': 'Rules combined successfully', 'combined_ast': str(combined_ast)})
 
-# Example API to evaluate a rule
+
 @app.route('/evaluate_rule', methods=['POST'])
 def evaluate_rule_api():
     
@@ -37,8 +37,8 @@ def evaluate_rule_api():
     
     if not rule_ast or not data:
         return jsonify({'error': 'Missing rule_ast or data'}), 400
-    print(f"Data received for evaluation: {data}")  # Log received data
-    result = evaluate_rule(rule_ast, data)  # Use your function from rule.py
+    print(f"Data received for evaluation: {data}")  
+    result = evaluate_rule(rule_ast, data)  
     print(f"Evaluation result: {result}")
     return jsonify({'result': result}),200
 
