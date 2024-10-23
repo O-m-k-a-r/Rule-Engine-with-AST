@@ -16,7 +16,7 @@ This project is a simple 3-tier rule engine application that allows users to cre
 ```
 
 ## Features
-+ **Rule Creation:** Allows creating rules based on conditions (e.g., `age > 30`, `department = 'Sales'`) using an AST and returns the `Root Node` of AST formed.
++ **Rule Creation:** Allows creating rules based on attributes (e.g., `age > 30`, `department = 'Sales'`, `salary = 50000` and `experience = 5`) using an AST and returns the `Root Node` of AST formed.
 + **Rule Combination:** Supports combining rules with a heuristic to minimize redundant checks and returns the `Root Node` of the combined AST.
 + **Rule Evaluation:** Evaluates the combined rule against provided data and states it as `True` or `False`.
 + **Frontend:** A basic HTML form to interact with the rule engine (create, combine, and evaluate rules).
